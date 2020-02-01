@@ -2,11 +2,15 @@
 
 Collection of memory configuration files for Xilinx Vivado along with example design for a few boards.
 
+# Xilinx Vivado Custom Part Data Files (in CVS format)
+Tested with Vivado version 2019.2
+
 # DDR4 Memory
-- UDIMM  Crutial Ballistix Sport BLS4G4D240FSB (CT40A512M8RH-075E component)
-- UDIMM  Crutial Ballistix Sport BLS8G4D240FSB (CT40A512M8RH-075E component)
-- SODIMM Crutial Ballistix Sport BLS4G4S26BFSD (CT40A512M8WE-75H component)
-- SODIMM Micron MTA8ATF1G64HZ (MT40A1G8WE-075E component)
+- UDIMM  Crutial Ballistix Sport BLS4G4D240FSB  (CT40A512M8RH-075E component) - 4GB
+- UDIMM  Crutial Ballistix Sport BLS8G4D240FSB  (CT40A512M8RH-075E component) - 8GB
+- UDIMM  Crutial Ballistix Sport BLS16G4D26BFSB (CT40A1G8WE-75H:D  component) - 16GB
+- SODIMM Crutial Ballistix Sport BLS4G4S26BFSD  (CT40A512M8WE-75H component)  - 4GB
+- SODIMM Micron MTA8ATF1G64HZ (MT40A1G8WE-075E component) - 8GB
   
 # Example design for Ballistix 4GB UDIMM's
 - Bittware CVP13
@@ -16,13 +20,15 @@ Collection of memory configuration files for Xilinx Vivado along with example de
 
 # BCU1525 quad-channel example usage
 
-Clone repo, go to board directory and source TCL script from Vivado. For example:<br>
+Clone repo, go to your project directory and source TCL script from Vivado. For example:<br>
 ```cd ~```<br>
 ```git clone https://github.com/D953i/Custom_Part_Data_Files.git```
 
 In Vivado TCL console:<br>
-```cd ~/Custom_Part_Data_Files/Boards/Xilinx_BCU1525/```<br>
-```source ./example.tcl```
+```source ../_github/Custom_Part_Data_Files/Boards/Xilinx_BCU1525/create_project.tcl```
+
+# BCU1525 create project by using tcl script
+![Vivado_Source_Script](Images/BCU1525_SourceScript.PNG?raw=true "Vivado Source Script Screenshot")
 
 # BCU1525 quad-channel ddr4 example block diagram
 ![Vivado_Block_Diagram](Images/BCU1525_Quad_DDR4_BlockDiagram.PNG?raw=true "Vivado Block Diagram")

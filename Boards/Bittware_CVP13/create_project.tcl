@@ -1,5 +1,13 @@
 
-set ProjectName example
+#Need apply patch to Xilinx MIG before can enable DDR4-2666 speed for DIMM/UDIMM.
+set MEM_SPEED 2400
+
+set ProjectName cvp13_ballistix
+
+if {$MEM_SPEED == 2666} {
+   append ProjectName $MEM_SPEED
+}
+
 set ProjectFolder ./$ProjectName
 
 #Remove unnecessary files.
@@ -18,16 +26,23 @@ if {[file exists "$ProjectFolder"]} {
     file delete -force $ProjectFolder
 }
 
+set scriptPath [file dirname [file normalize [info script]]]
+set sourceRoot [join [lrange [file split [file dirname [info script]]] 0 end-2] "/"]
 
 create_project $ProjectName $ProjectFolder -part xcvu13p-figd2104-2-e
 
-create_bd_design "design_1"
+create_bd_design "bd"
 
-import_files -norecurse ./../../Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
-import_files -fileset constrs_1 -norecurse ./CVP13_DIMM0.xdc
-import_files -fileset constrs_1 -norecurse ./CVP13_DIMM1.xdc
-#add_files -fileset constrs_1 -norecurse ./CVP13_DIMM0.xdc
-#add_files -fileset constrs_1 -norecurse ./CVP13_DIMM1.xdc
+set_param synth.maxThreads 8
+set_param general.maxThreads 12
+
+import_files -norecurse $sourceRoot/Memory/Crutial_Ballistix_Sport/BLS4G4D240FSB.csv
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM0.xdc
+import_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM1.xdc
+
+#Uncomment to create local copy of files.
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM0.xdc
+#add_files -fileset constrs_1 -norecurse $sourceRoot/Boards/Bittware_CVP13/CVP13_DIMM1.xdc
 
 
 startgroup
@@ -69,16 +84,31 @@ make_bd_intf_pins_external  [get_bd_intf_pins ddr4_1/C0_DDR4]
 set_property name C1_DDR4_0 [get_bd_intf_ports C0_DDR4_1]
 endgroup
 
+if {$MEM_SPEED == 2666} {
+    startgroup
+    set_property -dict [list CONFIG.C0.DDR4_TimePeriod {750} CONFIG.C0.DDR4_InputClockPeriod {9996} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_0]
+    set_property -dict [list CONFIG.C0.DDR4_TimePeriod {750} CONFIG.C0.DDR4_InputClockPeriod {9996} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_1]
+
+    set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
+    set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_1]
+
+    set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2666} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_0]
+    set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2666} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_1]
+    endgroup
+} else {
+    startgroup
+    set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {9996} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_0]
+    set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {9996} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_1]
+
+    set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
+    set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_1]
+
+    set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_0]
+    set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_1]
+    endgroup
+}
+
 startgroup
-set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {9996} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_TimePeriod {833} CONFIG.C0.DDR4_InputClockPeriod {9996} CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5}] [get_bd_cells ddr4_1]
-
-set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_CustomParts [lindex [get_files */BLS4G4D240FSB.csv] 0] CONFIG.C0.DDR4_isCustom {true}] [get_bd_cells ddr4_1]
-
-set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_0]
-set_property -dict [list CONFIG.C0.DDR4_MemoryType {UDIMMs} CONFIG.C0.DDR4_MemoryPart {BLS4G4D240FSB-2400} CONFIG.C0.DDR4_DataWidth {64}] [get_bd_cells ddr4_1]
-
 set_property -dict [list CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100}] [get_bd_cells ddr4_0]
 set_property -dict [list CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100}] [get_bd_cells ddr4_1]
 endgroup
@@ -142,6 +172,6 @@ endgroup
 
 assign_bd_address
 
-make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/design_1/design_1.bd] -top
-add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/design_1/hdl/design_1_wrapper.v
+make_wrapper -files [get_files ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/bd.bd] -top
+add_files -norecurse ./$ProjectName/$ProjectName.srcs/sources_1/bd/bd/hdl/bd_wrapper.v
 
